@@ -1,4 +1,4 @@
-import { kv } from "@vercel/kv";
+import { put, head, list } from "@vercel/blob";
 
 const FRIENDS = ["henry", "dave", "stephen", "nick", "dre"] as const;
 export type Friend = (typeof FRIENDS)[number];
@@ -12,89 +12,108 @@ export type MeetupInfo = {
   location: string;
 } | null;
 
-// In-memory fallback store for local development without KV credentials
-const memoryStore: AvailabilityData = {
-  henry: [],
-  dave: [],
-  stephen: [],
-  nick: [],
-  dre: [],
+type StorageData = {
+  availability: AvailabilityData;
+  meetup: MeetupInfo;
 };
 
-let memoryMeetup: MeetupInfo = null;
+const BLOB_NAME = "dev-scheduler-data.json";
 
-function hasKVCredentials(): boolean {
-  return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
+// In-memory fallback for local dev without blob credentials
+let memoryStore: StorageData = {
+  availability: {
+    henry: [],
+    dave: [],
+    stephen: [],
+    nick: [],
+    dre: [],
+  },
+  meetup: null,
+};
+
+function hasBlobCredentials(): boolean {
+  return !!process.env.BLOB_READ_WRITE_TOKEN;
+}
+
+async function getData(): Promise<StorageData> {
+  if (!hasBlobCredentials()) {
+    return memoryStore;
+  }
+
+  try {
+    const { blobs } = await list({ prefix: BLOB_NAME });
+    if (blobs.length === 0) {
+      return {
+        availability: { henry: [], dave: [], stephen: [], nick: [], dre: [] },
+        meetup: null,
+      };
+    }
+    const response = await fetch(blobs[0].url);
+    return response.json();
+  } catch {
+    return {
+      availability: { henry: [], dave: [], stephen: [], nick: [], dre: [] },
+      meetup: null,
+    };
+  }
+}
+
+async function saveData(data: StorageData): Promise<void> {
+  if (!hasBlobCredentials()) {
+    memoryStore = data;
+    return;
+  }
+
+  await put(BLOB_NAME, JSON.stringify(data), {
+    access: "public",
+    addRandomSuffix: false,
+  });
 }
 
 export async function getUserAvailability(user: Friend): Promise<string[]> {
-  if (!hasKVCredentials()) {
-    return memoryStore[user] || [];
-  }
-
-  const data = await kv.get<string[]>(`availability:${user}`);
-  return data || [];
+  const data = await getData();
+  return data.availability[user] || [];
 }
 
 export async function setUserAvailability(
   user: Friend,
   dates: string[]
 ): Promise<void> {
-  if (!hasKVCredentials()) {
-    memoryStore[user] = dates;
-    return;
-  }
-
-  await kv.set(`availability:${user}`, dates);
+  const data = await getData();
+  data.availability[user] = dates;
+  await saveData(data);
 }
 
 export async function getAllAvailability(): Promise<AvailabilityData> {
-  const result: AvailabilityData = {
-    henry: [],
-    dave: [],
-    stephen: [],
-    nick: [],
-    dre: [],
-  };
-
-  for (const friend of FRIENDS) {
-    result[friend] = await getUserAvailability(friend);
-  }
-
-  return result;
+  const data = await getData();
+  return data.availability;
 }
 
 export async function toggleDateForUser(
   user: Friend,
   date: string
 ): Promise<string[]> {
-  const current = await getUserAvailability(user);
+  const data = await getData();
+  const current = data.availability[user] || [];
   const index = current.indexOf(date);
 
-  let updated: string[];
   if (index === -1) {
-    updated = [...current, date].sort();
+    data.availability[user] = [...current, date].sort();
   } else {
-    updated = current.filter((d) => d !== date);
+    data.availability[user] = current.filter((d) => d !== date);
   }
 
-  await setUserAvailability(user, updated);
-  return updated;
+  await saveData(data);
+  return data.availability[user];
 }
 
 export async function getMeetup(): Promise<MeetupInfo> {
-  if (!hasKVCredentials()) {
-    return memoryMeetup;
-  }
-
-  return kv.get<MeetupInfo>("meetup");
+  const data = await getData();
+  return data.meetup;
 }
 
 export async function setMeetup(meetup: MeetupInfo): Promise<void> {
-  if (!hasKVCredentials()) {
-    memoryMeetup = meetup;
-    return;
-  }
-
-  await kv.set("meetup", meetup);
+  const data = await getData();
+  data.meetup = meetup;
+  await saveData(data);
 }
