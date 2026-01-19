@@ -186,13 +186,15 @@ export function Calendar({
           availability={availability}
           onDateClick={onDateClick}
         />
-        <MonthGrid
-          year={secondMonth.getFullYear()}
-          month={secondMonth.getMonth()}
-          currentUser={currentUser}
-          availability={availability}
-          onDateClick={onDateClick}
-        />
+        <div className="hidden sm:block flex-1">
+          <MonthGrid
+            year={secondMonth.getFullYear()}
+            month={secondMonth.getMonth()}
+            currentUser={currentUser}
+            availability={availability}
+            onDateClick={onDateClick}
+          />
+        </div>
       </div>
     </div>
   );

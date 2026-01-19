@@ -1,16 +1,14 @@
 "use client";
 
 import { useState, useTransition, useCallback } from "react";
-import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/calendar";
 import { AvailabilityLegend } from "@/components/availability-legend";
 import { NextMeetup } from "@/components/next-meetup";
-import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Field, Label } from "@/components/ui/fieldset";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
-import { toggleAvailability, logout } from "@/app/actions";
+import { toggleAvailability } from "@/app/actions";
 import { friends, type Friend, type MeetupInfo } from "@/lib/storage";
 
 type Availability = Record<Friend, string[]>;
@@ -29,7 +27,6 @@ const FRIEND_DISPLAY_NAMES: Record<Friend, string> = {
 };
 
 export function SchedulerClient({ initialAvailability, initialMeetup }: SchedulerClientProps) {
-  const router = useRouter();
   const [availability, setAvailability] =
     useState<Availability>(initialAvailability);
   const [currentUser, setCurrentUser] = useState<Friend | null>(null);
@@ -70,26 +67,14 @@ export function SchedulerClient({ initialAvailability, initialMeetup }: Schedule
     []
   );
 
-  const handleLogout = useCallback(() => {
-    startTransition(async () => {
-      await logout();
-      router.push("/");
-    });
-  }, [router]);
-
   return (
     <div className="min-h-screen p-4 sm:p-8">
       <div className="mx-auto max-w-3xl">
-        <header className="mb-8 flex items-start justify-between">
-          <div>
-            <Heading>Dev Scheduler</Heading>
-            <Text className="mt-1">
-              Select your name and click dates to mark your availability
-            </Text>
-          </div>
-          <Button onClick={handleLogout} color="outline" disabled={isPending}>
-            Sign Out
-          </Button>
+        <header className="mb-8">
+          <Heading>Dev Scheduler</Heading>
+          <Text className="mt-1">
+            Select your name and click dates to mark your availability
+          </Text>
         </header>
 
         <div className="mb-6">
