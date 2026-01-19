@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import { Link } from "./link";
 
 export function Text({
   className,
@@ -10,21 +9,6 @@ export function Text({
       data-slot="text"
       {...props}
       className={clsx(className, "text-base/6 text-mist-500 sm:text-sm/6")}
-    />
-  );
-}
-
-export function TextLink({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<typeof Link>) {
-  return (
-    <Link
-      {...props}
-      className={clsx(
-        className,
-        "text-mist-900 underline decoration-mist-400 data-[hover]:decoration-mist-600"
-      )}
     />
   );
 }

@@ -2,8 +2,6 @@
 
 import * as Headless from "@headlessui/react";
 import clsx from "clsx";
-import React from "react";
-import { Link } from "./link";
 
 const styles = {
   base: [
@@ -29,16 +27,11 @@ const styles = {
   ],
 };
 
-type ButtonProps = (
-  | { color?: "solid" | "outline" | "plain"; href?: undefined }
-  | { color?: "solid" | "outline" | "plain"; href: string }
-) & {
+type ButtonProps = {
+  color?: "solid" | "outline" | "plain";
   className?: string;
   children: React.ReactNode;
-} & (
-    | Omit<Headless.ButtonProps, "as" | "className">
-    | Omit<React.ComponentPropsWithoutRef<typeof Link>, "className">
-  );
+} & Omit<Headless.ButtonProps, "as" | "className">;
 
 export function Button({
   color = "solid",
@@ -48,11 +41,7 @@ export function Button({
 }: ButtonProps) {
   const classes = clsx(className, styles.base, styles[color]);
 
-  return "href" in props ? (
-    <Link {...props} className={classes}>
-      {children}
-    </Link>
-  ) : (
+  return (
     <Headless.Button {...props} className={classes}>
       {children}
     </Headless.Button>

@@ -1,6 +1,7 @@
 {
   "name": "dev-scheduler",
   "version": "0.1.0",
+  "type": "module",
   "description": "Fancy Next.js app",
   "scripts": {
     "dev": "next",
