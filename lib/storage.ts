@@ -1,4 +1,4 @@
-import { put, head, list } from "@vercel/blob";
+import { put, list, del } from "@vercel/blob";
 
 const FRIENDS = ["henry", "dave", "stephen", "nick", "dre"] as const;
 export type Friend = (typeof FRIENDS)[number];
@@ -68,6 +68,7 @@ async function saveData(data: StorageData): Promise<void> {
     access: "public",
     addRandomSuffix: false,
     allowOverwrite: true,
+    contentType: "application/json",
   });
 }
 
