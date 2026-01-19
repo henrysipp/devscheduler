@@ -67,6 +67,7 @@ async function saveData(data: StorageData): Promise<void> {
   await put(BLOB_NAME, JSON.stringify(data), {
     access: "public",
     addRandomSuffix: false,
+    allowOverwrite: true,
   });
 }
 
