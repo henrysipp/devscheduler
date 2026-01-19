@@ -1,0 +1,17 @@
+@import "tailwindcss";
+@config "../tailwind.config.ts";
+
+@layer base {
+  html,
+  body {
+    @apply bg-mist-50 text-mist-900 antialiased;
+  }
+}
+
+@layer utilities {
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+}
