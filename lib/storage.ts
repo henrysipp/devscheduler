@@ -6,6 +6,12 @@ export const friends = FRIENDS;
 
 type AvailabilityData = Record<Friend, string[]>;
 
+export type MeetupInfo = {
+  date: string;
+  time: string;
+  location: string;
+} | null;
+
 // In-memory fallback store for local development without KV credentials
 const memoryStore: AvailabilityData = {
   henry: [],
@@ -14,6 +20,8 @@ const memoryStore: AvailabilityData = {
   nick: [],
   dre: [],
 };
+
+let memoryMeetup: MeetupInfo = null;
 
 function hasKVCredentials(): boolean {
   return !!(process.env.KV_REST_API_URL && process.env.KV_REST_API_TOKEN);
@@ -72,4 +80,21 @@ export async function toggleDateForUser(
 
   await setUserAvailability(user, updated);
   return updated;
+}
+
+export async function getMeetup(): Promise<MeetupInfo> {
+  if (!hasKVCredentials()) {
+    return memoryMeetup;
+  }
+
+  return kv.get<MeetupInfo>("meetup");
+}
+
+export async function setMeetup(meetup: MeetupInfo): Promise<void> {
+  if (!hasKVCredentials()) {
+    memoryMeetup = meetup;
+    return;
+  }
+
+  await kv.set("meetup", meetup);
 }

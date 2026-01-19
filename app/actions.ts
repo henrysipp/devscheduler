@@ -5,7 +5,10 @@ import { redirect } from "next/navigation";
 import {
   getAllAvailability,
   toggleDateForUser,
+  getMeetup,
+  setMeetup,
   type Friend,
+  type MeetupInfo,
   friends,
 } from "@/lib/storage";
 
@@ -55,4 +58,13 @@ export async function toggleAvailability(
 
 export async function getAvailability() {
   return getAllAvailability();
+}
+
+export async function getNextMeetup() {
+  return getMeetup();
+}
+
+export async function updateMeetup(meetup: MeetupInfo) {
+  await setMeetup(meetup);
+  return meetup;
 }

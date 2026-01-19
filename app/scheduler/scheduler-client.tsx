@@ -4,18 +4,20 @@ import { useState, useTransition, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Calendar } from "@/components/calendar";
 import { AvailabilityLegend } from "@/components/availability-legend";
+import { NextMeetup } from "@/components/next-meetup";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/select";
 import { Field, Label } from "@/components/ui/fieldset";
 import { Heading } from "@/components/ui/heading";
 import { Text } from "@/components/ui/text";
 import { toggleAvailability, logout } from "@/app/actions";
-import { friends, type Friend } from "@/lib/storage";
+import { friends, type Friend, type MeetupInfo } from "@/lib/storage";
 
 type Availability = Record<Friend, string[]>;
 
 interface SchedulerClientProps {
   initialAvailability: Availability;
+  initialMeetup: MeetupInfo;
 }
 
 const FRIEND_DISPLAY_NAMES: Record<Friend, string> = {
@@ -26,7 +28,7 @@ const FRIEND_DISPLAY_NAMES: Record<Friend, string> = {
   dre: "Dre",
 };
 
-export function SchedulerClient({ initialAvailability }: SchedulerClientProps) {
+export function SchedulerClient({ initialAvailability, initialMeetup }: SchedulerClientProps) {
   const router = useRouter();
   const [availability, setAvailability] =
     useState<Availability>(initialAvailability);
@@ -89,6 +91,10 @@ export function SchedulerClient({ initialAvailability }: SchedulerClientProps) {
             Sign Out
           </Button>
         </header>
+
+        <div className="mb-6">
+          <NextMeetup initialMeetup={initialMeetup} />
+        </div>
 
         <div className="mb-6">
           <Field>

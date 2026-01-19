@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { isAuthenticated, getAvailability } from "@/app/actions";
+import { isAuthenticated, getAvailability, getNextMeetup } from "@/app/actions";
 import { SchedulerClient } from "./scheduler-client";
 
 export default async function SchedulerPage() {
@@ -9,7 +9,12 @@ export default async function SchedulerPage() {
     redirect("/");
   }
 
-  const availability = await getAvailability();
+  const [availability, meetup] = await Promise.all([
+    getAvailability(),
+    getNextMeetup(),
+  ]);
 
-  return <SchedulerClient initialAvailability={availability} />;
+  return (
+    <SchedulerClient initialAvailability={availability} initialMeetup={meetup} />
+  );
 }
